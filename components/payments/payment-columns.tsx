@@ -81,9 +81,7 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
       const formatted = new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-        useGrouping: true,
+        maximumFractionDigits: 0,
       }).format(amount);
       return <div className="font-medium">{formatted}</div>;
     },
