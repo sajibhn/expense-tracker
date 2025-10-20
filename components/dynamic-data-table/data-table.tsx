@@ -260,7 +260,7 @@ export function DataTable<TData, TValue>({
       {bulkActionBar && selectedRowCount > 0 && (
         <div className="mb-2">{bulkActionBar}</div>
       )}
-      {(showTableHeader && search && onSearch) && (
+      {(showTableHeader && onSearch !== undefined) && (
         <DataTableToolbar
           tableHeaderClassNames={tableHeaderClassNames}
           customFilters={customFilters}
@@ -270,7 +270,7 @@ export function DataTable<TData, TValue>({
           searchPlaceholder={searchPlaceholder}
           tableLoading={tableLoading}
           onSearch={onSearch}
-          search={search}
+          search={search || ""}
           table={table}
         />
       )}

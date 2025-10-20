@@ -87,7 +87,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
                 return (
                   <Button
                     key={p}
-                    variant={isActive ? "default" : "outline"}
+                    variant={isActive ? "secondary" : "outline"}
                     className={isActive ? "bg-accent" : ""}
                     size="sm"
                     onClick={() => table.setPageIndex(p - 1)}
