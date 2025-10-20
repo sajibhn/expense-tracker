@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import { DataTable } from "@/components/dynamic-data-table/data-table";
-import { expenseColumns } from "@/components/expenses/expense-columns";
+import { getExpenseColumns } from "@/components/expenses/expense-columns";
 import type { Database } from "@/types/supabase";
 import type { ColumnFiltersState, PaginationState } from "@tanstack/react-table";
 import { getExpenses } from "@/app/actions/expenses";
@@ -81,9 +81,17 @@ export function ExpensesClient({ initialExpenses, initialCount }: ExpensesClient
     });
   }, [expenses, search]);
 
+  const handleDeleteOptimistic = (expenseId: string) => {
+    // Immediately remove from UI
+    setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
+    setTotalCount((prev) => prev - 1);
+  };
+
+  const columns = useMemo(() => getExpenseColumns(handleDeleteOptimistic), []);
+
   return (
     <DataTable
-      columns={expenseColumns}
+      columns={columns}
       data={filteredExpenses}
       filters={filters}
       columnFilters={columnFilters}

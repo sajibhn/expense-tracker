@@ -3,13 +3,14 @@ import { getCategoryById } from "@/app/actions/categories";
 import { notFound } from "next/navigation";
 
 interface EditCategoryPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditCategoryPage({ params }: EditCategoryPageProps) {
-  const { data: category, error } = await getCategoryById(params.id);
+  const { id } = await params;
+  const { data: category, error } = await getCategoryById(id);
 
   if (error || !category) {
     notFound();

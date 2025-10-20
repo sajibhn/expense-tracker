@@ -22,21 +22,25 @@ type Expense = Database["public"]["Tables"]["expenses"]["Row"] & {
   category?: { id: string; name: string } | null;
 };
 
-function DeleteExpenseDialog({ expense }: { expense: Expense }) {
+function DeleteExpenseDialog({ expense, onDeleteOptimistic }: { expense: Expense; onDeleteOptimistic?: (id: string) => void }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setOpen(false);
+    
+    // Optimistically remove from UI
+    if (onDeleteOptimistic) {
+      onDeleteOptimistic(expense.id);
+    }
+    
     const result = await deleteExpense(expense.id);
     
     if (result.error) {
       alert(`Error deleting expense: ${result.error}`);
-      setIsDeleting(false);
-    } else {
-      setOpen(false);
-      router.refresh();
+      router.refresh(); // Restore data on error
     }
   };
 
@@ -51,7 +55,7 @@ function DeleteExpenseDialog({ expense }: { expense: Expense }) {
         <DialogHeader>
           <DialogTitle>Delete Expense</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{expense.name}"?
+            Are you sure you want to delete &quot;{expense.name}&quot;?
             This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
@@ -76,7 +80,7 @@ function DeleteExpenseDialog({ expense }: { expense: Expense }) {
   );
 }
 
-export const expenseColumns: ColumnDef<Expense>[] = [
+export const getExpenseColumns = (onDeleteOptimistic?: (id: string) => void): ColumnDef<Expense>[] => [
   {
     accessorKey: "name",
     header: "Name",
@@ -114,24 +118,33 @@ export const expenseColumns: ColumnDef<Expense>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const expense = row.original;
-      const router = useRouter();
-
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="h-8 w-8"
-            onClick={() => router.push(`/expenses/${expense.id}/edit`)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <DeleteExpenseDialog expense={expense} />
-        </div>
-      );
-    },
+    cell: ({ row }) => <ExpenseActions expense={row.original} onDeleteOptimistic={onDeleteOptimistic} />,
   },
 ];
+
+function ExpenseActions({ 
+  expense, 
+  onDeleteOptimistic 
+}: { 
+  expense: Expense; 
+  onDeleteOptimistic?: (id: string) => void 
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="h-8 w-8"
+        onClick={() => router.push(`/expenses/${expense.id}/edit`)}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <DeleteExpenseDialog expense={expense} onDeleteOptimistic={onDeleteOptimistic} />
+    </div>
+  );
+}
+
+export const expenseColumns = getExpenseColumns();
 

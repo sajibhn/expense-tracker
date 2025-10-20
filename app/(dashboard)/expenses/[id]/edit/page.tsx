@@ -4,14 +4,16 @@ import { getCategories } from "@/app/actions/categories";
 import { notFound } from "next/navigation";
 
 interface EditExpensePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditExpensePage({ params }: EditExpensePageProps) {
+  const { id } = await params;
+  
   const [expenseResult, categoriesResult] = await Promise.all([
-    getExpenseById(params.id),
+    getExpenseById(id),
     getCategories(),
   ]);
 

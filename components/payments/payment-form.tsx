@@ -84,7 +84,7 @@ export function PaymentForm({ payment, mode }: PaymentFormProps) {
           id="amount"
           type="number"
           step="0.01"
-          {...register("amount")}
+          {...register("amount", { valueAsNumber: true })}
           placeholder="e.g., 1000.00"
           disabled={isSubmitting}
         />

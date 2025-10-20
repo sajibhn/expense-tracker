@@ -28,13 +28,14 @@ function DeleteCategoryDialog({ category }: { category: Category }) {
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setOpen(false);
+    
     const result = await deleteCategory(category.id);
     
     if (result.error) {
       alert(`Error deleting category: ${result.error}`);
       setIsDeleting(false);
     } else {
-      setOpen(false);
       router.refresh();
     }
   };
@@ -50,7 +51,7 @@ function DeleteCategoryDialog({ category }: { category: Category }) {
         <DialogHeader>
           <DialogTitle>Delete Category</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the category "{category.name}"?
+            Are you sure you want to delete the category &quot;{category.name}&quot;?
             This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
@@ -120,24 +121,25 @@ export const categoryColumns: ColumnDef<Category>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const category = row.original;
-      const router = useRouter();
-
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="h-8 w-8"
-            onClick={() => router.push(`/categories/${category.id}/edit`)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <DeleteCategoryDialog category={category} />
-        </div>
-      );
-    },
+    cell: ({ row }) => <CategoryActions category={row.original} />,
   },
 ];
+
+function CategoryActions({ category }: { category: Category }) {
+  const router = useRouter();
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="h-8 w-8"
+        onClick={() => router.push(`/categories/${category.id}/edit`)}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <DeleteCategoryDialog category={category} />
+    </div>
+  );
+}
 

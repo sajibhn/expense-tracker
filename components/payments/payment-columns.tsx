@@ -20,21 +20,25 @@ import { format } from "date-fns";
 
 type Payment = Database["public"]["Tables"]["payments"]["Row"];
 
-function DeletePaymentDialog({ payment }: { payment: Payment }) {
+function DeletePaymentDialog({ payment, onDeleteOptimistic }: { payment: Payment; onDeleteOptimistic?: (id: string) => void }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setOpen(false);
+    
+    // Optimistically remove from UI
+    if (onDeleteOptimistic) {
+      onDeleteOptimistic(payment.id);
+    }
+    
     const result = await deletePayment(payment.id);
     
     if (result.error) {
       alert(`Error deleting payment: ${result.error}`);
-      setIsDeleting(false);
-    } else {
-      setOpen(false);
-      router.refresh();
+      router.refresh(); // Restore data on error
     }
   };
 
@@ -74,7 +78,7 @@ function DeletePaymentDialog({ payment }: { payment: Payment }) {
   );
 }
 
-export const paymentColumns: ColumnDef<Payment>[] = [
+export const getPaymentColumns = (onDeleteOptimistic?: (id: string) => void): ColumnDef<Payment>[] => [
   {
     accessorKey: "amount",
     header: "Amount",
@@ -103,34 +107,35 @@ export const paymentColumns: ColumnDef<Payment>[] = [
     },
   },
   {
-    accessorKey: "created_at",
-    header: "Created At",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("created_at"));
-      return <div>{format(date, "d MMMM yyyy")}</div>;
-    },
-  },
-  {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const payment = row.original;
-      const router = useRouter();
-
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="h-8 w-8"
-            onClick={() => router.push(`/payments/${payment.id}/edit`)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <DeletePaymentDialog payment={payment} />
-        </div>
-      );
-    },
+    cell: ({ row }) => <PaymentActions payment={row.original} onDeleteOptimistic={onDeleteOptimistic} />,
   },
 ];
+
+function PaymentActions({ 
+  payment, 
+  onDeleteOptimistic 
+}: { 
+  payment: Payment; 
+  onDeleteOptimistic?: (id: string) => void 
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="h-8 w-8"
+        onClick={() => router.push(`/payments/${payment.id}/edit`)}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <DeletePaymentDialog payment={payment} onDeleteOptimistic={onDeleteOptimistic} />
+    </div>
+  );
+}
+
+export const paymentColumns = getPaymentColumns();
 

@@ -141,7 +141,7 @@ export function ExpenseForm({ expense, categories, mode }: ExpenseFormProps) {
           id="amount"
           type="number"
           step="0.01"
-          {...register("amount")}
+          {...register("amount", { valueAsNumber: true })}
           placeholder="e.g., 50.00"
           disabled={isSubmitting}
         />

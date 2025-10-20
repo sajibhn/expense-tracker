@@ -3,7 +3,7 @@ import { z } from "zod";
 export const expenseSchema = z.object({
   name: z.string().min(1, "Expense name is required").max(100, "Name is too long"),
   category_id: z.string().min(1, "Category is required"),
-  amount: z.coerce.number().positive("Amount must be greater than 0"),
+  amount: z.number().positive("Amount must be greater than 0"),
   date: z
     .string()
     .min(1, "Date is required")

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useTransition } from "react";
 import { DataTable } from "@/components/dynamic-data-table/data-table";
-import { paymentColumns } from "@/components/payments/payment-columns";
+import { getPaymentColumns } from "@/components/payments/payment-columns";
 import type { Database } from "@/types/supabase";
 import type { ColumnFiltersState, PaginationState } from "@tanstack/react-table";
 import { getPayments } from "@/app/actions/payments";
@@ -78,9 +78,17 @@ export function PaymentsClient({ initialPayments, initialCount }: PaymentsClient
     });
   }, [payments, search]);
 
+  const handleDeleteOptimistic = (paymentId: string) => {
+    // Immediately remove from UI
+    setPayments((prev) => prev.filter((p) => p.id !== paymentId));
+    setTotalCount((prev) => prev - 1);
+  };
+
+  const columns = useMemo(() => getPaymentColumns(handleDeleteOptimistic), []);
+
   return (
     <DataTable
-      columns={paymentColumns}
+      columns={columns}
       data={filteredPayments}
       filters={filters}
       columnFilters={columnFilters}

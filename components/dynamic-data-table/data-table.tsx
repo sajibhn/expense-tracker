@@ -162,7 +162,6 @@ export function DataTable<TData, TValue>({
     header: ({ table }: { table: any }) => (
       <Checkbox
         name="select-all"
-        label=""
         checked={table.getIsAllPageRowsSelected()}
         onChange={table.getToggleAllPageRowsSelectedHandler()}
       />
@@ -170,11 +169,9 @@ export function DataTable<TData, TValue>({
     cell: ({ row }: { row: Row<TData> }) => (
       <Checkbox
         name={`select-${row.id}`}
-        label=""
         checked={row.getIsSelected()}
         disabled={!row.getCanSelect()}
         onChange={row.getToggleSelectedHandler()}
-        error=""
       />
     ),
     enableSorting: false,
