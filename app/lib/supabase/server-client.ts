@@ -3,9 +3,28 @@ import { type NextRequest, type NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-// server component can only get cookies and not set them, hence the "component" check
-export function createSupabaseServerClient(component: boolean = false) {
-  const cookieStore = cookies();
+// For Server Components (read-only)
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {
+          // Do nothing in server components
+        },
+      },
+    }
+  );
+}
+
+// For Server Actions (can set cookies)
+export async function createSupabaseServerActionClient() {
+  const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,19 +34,19 @@ export function createSupabaseServerClient(component: boolean = false) {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
-          if (component) return;
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch (error) {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     }
   );
-}
-
-export function createSupabaseServerComponentClient() {
-  cookies().getAll();
-  return createSupabaseServerClient(true);
 }
 
 export function createSupabaseReqResClient(
