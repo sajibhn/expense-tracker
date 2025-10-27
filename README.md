@@ -4,7 +4,7 @@ This is a time tracker app which keep track of your monthly expenses. <br>
 
 ## Live Preview
 
-![demo](demo/web-app.png)
+![demo](demo/app.png)
 
 ## Technologies
 
