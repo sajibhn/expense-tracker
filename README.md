@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Expense Tracker
 
-## Getting Started
+This is a time tracker app which keep track of your monthly expenses. <br>
 
-First, run the development server:
+## Live Preview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![demo](demo/web-app.png)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next JS - [Link](https://nextjs.org/)
+- Firebase - [Link](https://supabase.com/)
+- Shadcn - [Link](https://ui.shadcn.com/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- User can log in securely using email and password authentication.
+- User can view total monthly expenses and payments on the dashboard.
+- User can add, edit, or delete expenses with category and date fields.
+- User can create and manage custom categories with images stored in Supabase Storage.
+- User can add and track payments with name, amount, and date.
+- User can filter expenses by date and view category-wise summaries.
+- User can visualize the last 6 months’ expense and payment trends in a comparison chart.
 
-To learn more about Next.js, take a look at the following resources:
+## What I learned
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Learned how to build a full-stack application using Next.js and Supabase.
+- Gained experience with Supabase Authentication, Database, and Storage.
+- Learned how to implement CRUD operations and real-time data fetching.
+- Improved skills in creating interactive dashboards and data visualizations.
+- Strengthened understanding of React component structure and TypeScript best practices.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Author
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Sajib Hossain - [twitter](https://twitter.com/sajib_hsn)
+- Sajib Hossain - [Linked in](https://www.linkedin.com/in/sajib-hossain-17929b225/)
