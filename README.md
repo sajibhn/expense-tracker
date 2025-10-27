@@ -9,7 +9,7 @@ This is a time tracker app which keep track of your monthly expenses. <br>
 ## Technologies
 
 - Next JS - [Link](https://nextjs.org/)
-- Firebase - [Link](https://supabase.com/)
+- Supabase - [Link](https://supabase.com/)
 - Shadcn - [Link](https://ui.shadcn.com/)
 
 ## Features
