@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+	BookOpen,
 	DollarSign,
 	Home,
 	ShoppingCart,
@@ -37,6 +38,11 @@ const data = {
 			title: "Categories",
 			url: "/categories",
 			icon: SquareDashed,
+		},
+		{
+			title: "Vocabulary",
+			url: "/vocabulary",
+			icon: BookOpen,
 		},
 	],
 }
