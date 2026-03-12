@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { VocabularyFormDialog } from "./vocabulary-form-dialog";
 import { CategoryFilter } from "./category-filter";
-import { getVocabularies } from "@/app/actions/vocabulary";
+import { getVocabularies, deleteVocabulary } from "@/app/actions/vocabulary";
 
 const PAGE_SIZE = 100;
 
@@ -76,6 +76,17 @@ export function VocabularyClient({
     setPage(0);
   }, [debouncedSearch, selectedCategories]);
 
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this vocabulary?");
+    if (!confirmed) return;
+
+    const result = await deleteVocabulary(id);
+    if (!result.error) {
+      setVocabularies((prev) => prev.filter((v) => v.id !== id));
+      setTotalCount((prev) => prev - 1);
+    }
+  };
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -129,6 +140,14 @@ export function VocabularyClient({
                   {v.vocabulary_category.name}
                 </Badge>
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`${v.vocabulary_category ? "" : "ml-auto "}h-8 w-8 text-muted-foreground hover:text-destructive`}
+                onClick={() => handleDelete(v.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           ))
         )}
