@@ -44,6 +44,7 @@ export function VocabularyClient({
     []
   );
   const [page, setPage] = React.useState(0);
+  const [refreshKey, setRefreshKey] = React.useState(0);
   const [isPending, startTransition] = React.useTransition();
 
   // Debounce search to avoid excessive server calls
@@ -69,7 +70,7 @@ export function VocabularyClient({
         setTotalCount(result.count);
       }
     });
-  }, [page, debouncedSearch, selectedCategories]);
+  }, [page, debouncedSearch, selectedCategories, refreshKey]);
 
   // Reset to first page when filters change
   React.useEffect(() => {
@@ -189,6 +190,7 @@ export function VocabularyClient({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         categories={initialCategories}
+        onSaved={() => setRefreshKey((k) => k + 1)}
       />
     </div>
   );

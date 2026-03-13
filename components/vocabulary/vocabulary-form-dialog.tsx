@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  vocabularySchema,
-  type VocabularyFormData,
+  multiVocabularySchema,
+  type MultiVocabularyFormData,
 } from "@/lib/validations/vocabulary";
 import { createVocabulary } from "@/app/actions/vocabulary";
 import { CategoryCombobox } from "./category-combobox";
@@ -25,12 +26,14 @@ interface VocabularyFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   categories: { id: string; name: string }[];
+  onSaved?: () => void;
 }
 
 export function VocabularyFormDialog({
   open,
   onOpenChange,
   categories,
+  onSaved,
 }: VocabularyFormDialogProps) {
   const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
@@ -41,39 +44,45 @@ export function VocabularyFormDialog({
     reset,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm<VocabularyFormData>({
-    resolver: zodResolver(vocabularySchema),
+  } = useForm<MultiVocabularyFormData>({
+    resolver: zodResolver(multiVocabularySchema),
     defaultValues: {
-      german: "",
-      english: "",
-      category_name: "",
+      entries: [{ german: "", english: "", category_name: "" }],
     },
   });
 
-  const categoryName = watch("category_name");
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "entries",
+  });
 
-  const onSubmit = async (data: VocabularyFormData) => {
+  const onSubmit = async (data: MultiVocabularyFormData) => {
     setError(null);
-    const result = await createVocabulary({
-      german: data.german,
-      english: data.english,
-      category_name: data.category_name || undefined,
-    });
 
-    if (result.error) {
-      setError(result.error);
-      return;
+    for (const entry of data.entries) {
+      const result = await createVocabulary({
+        german: entry.german,
+        english: entry.english,
+        category_name: entry.category_name || undefined,
+      });
+
+      if (result.error) {
+        setError(`Error saving "${entry.german}": ${result.error}`);
+        return;
+      }
     }
 
-    reset();
+    reset({ entries: [{ german: "", english: "", category_name: "" }] });
     onOpenChange(false);
+    onSaved?.();
     router.refresh();
   };
 
   const handleClose = (isOpen: boolean) => {
     if (!isOpen) {
-      reset();
+      reset({ entries: [{ german: "", english: "", category_name: "" }] });
       setError(null);
     }
     onOpenChange(isOpen);
@@ -81,7 +90,7 @@ export function VocabularyFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Vocabulary</DialogTitle>
         </DialogHeader>
@@ -92,43 +101,82 @@ export function VocabularyFormDialog({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="german">German</Label>
-            <Input
-              id="german"
-              placeholder="Enter German word"
-              {...register("german")}
-            />
-            {errors.german && (
-              <p className="text-sm text-red-500">{errors.german.message}</p>
-            )}
-          </div>
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="space-y-3 p-4 rounded-lg border bg-muted/30"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Word {index + 1}
+                </span>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                    onClick={() => remove(index)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="english">English</Label>
-            <Input
-              id="english"
-              placeholder="Enter English word"
-              {...register("english")}
-            />
-            {errors.english && (
-              <p className="text-sm text-red-500">{errors.english.message}</p>
-            )}
-          </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor={`german-${index}`}>German</Label>
+                  <Input
+                    id={`german-${index}`}
+                    placeholder="German word"
+                    {...register(`entries.${index}.german`)}
+                  />
+                  {errors.entries?.[index]?.german && (
+                    <p className="text-sm text-red-500">
+                      {errors.entries[index].german.message}
+                    </p>
+                  )}
+                </div>
 
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <CategoryCombobox
-              categories={categories}
-              value={categoryName || ""}
-              onChange={(val) => setValue("category_name", val)}
-            />
-            {errors.category_name && (
-              <p className="text-sm text-red-500">
-                {errors.category_name.message}
-              </p>
-            )}
-          </div>
+                <div className="space-y-1">
+                  <Label htmlFor={`english-${index}`}>English</Label>
+                  <Input
+                    id={`english-${index}`}
+                    placeholder="English word"
+                    {...register(`entries.${index}.english`)}
+                  />
+                  {errors.entries?.[index]?.english && (
+                    <p className="text-sm text-red-500">
+                      {errors.entries[index].english.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label>Category</Label>
+                <CategoryCombobox
+                  categories={categories}
+                  value={watch(`entries.${index}.category_name`) || ""}
+                  onChange={(val) =>
+                    setValue(`entries.${index}.category_name`, val)
+                  }
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() =>
+              append({ german: "", english: "", category_name: "" })
+            }
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add More
+          </Button>
 
           <DialogFooter>
             <Button

@@ -7,3 +7,9 @@ export const vocabularySchema = z.object({
 });
 
 export type VocabularyFormData = z.infer<typeof vocabularySchema>;
+
+export const multiVocabularySchema = z.object({
+  entries: z.array(vocabularySchema).min(1, "At least one entry is required"),
+});
+
+export type MultiVocabularyFormData = z.infer<typeof multiVocabularySchema>;
