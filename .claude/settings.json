@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm view:*)",
       "Bash(rm package-lock.json)",
-      "Bash(rm -rf node_modules)"
+      "Bash(rm -rf node_modules)",
+      "Bash(find f:codeexpense-tracker -name *vocabulary* -type f)",
+      "Bash(find f:codeexpense-tracker -path */types/* -name *.ts -type f)",
+      "Bash(npx shadcn@latest add textarea --yes)"
     ]
   }
 }

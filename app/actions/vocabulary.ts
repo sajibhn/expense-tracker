@@ -94,6 +94,7 @@ export async function getVocabularies(params?: {
 export async function createVocabulary(formData: {
   german: string;
   english: string;
+  example?: string;
   category_name?: string;
 }) {
   const supabase = await createSupabaseServerActionClient();
@@ -154,9 +155,94 @@ export async function createVocabulary(formData: {
     .insert({
       german: formData.german,
       english: formData.english,
+      example: formData.example || null,
       vocabulary_category_id: vocabularyCategoryId,
       user_id: user.id,
     })
+    .select(
+      `
+      *,
+      vocabulary_category:vocabulary_categories(id, name)
+    `
+    )
+    .single();
+
+  if (!error) {
+    revalidatePath("/vocabulary");
+  }
+
+  return { data, error: error?.message };
+}
+
+export async function updateVocabulary(
+  id: string,
+  formData: {
+    german: string;
+    english: string;
+    example?: string;
+    category_name?: string;
+  }
+) {
+  const supabase = await createSupabaseServerActionClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { data: null, error: "Unauthorized" };
+  }
+
+  let vocabularyCategoryId: string | null = null;
+
+  if (formData.category_name && formData.category_name.trim()) {
+    const categoryName = formData.category_name.trim();
+
+    const { data: existingCategory } = await supabase
+      .from("vocabulary_categories")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("name", categoryName)
+      .single();
+
+    if (existingCategory) {
+      vocabularyCategoryId = existingCategory.id;
+    } else {
+      const { data: newCategory, error: categoryError } = await supabase
+        .from("vocabulary_categories")
+        .insert({ name: categoryName, user_id: user.id })
+        .select("id")
+        .single();
+
+      if (categoryError) {
+        const { data: retryCategory } = await supabase
+          .from("vocabulary_categories")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("name", categoryName)
+          .single();
+
+        if (retryCategory) {
+          vocabularyCategoryId = retryCategory.id;
+        } else {
+          return { data: null, error: categoryError.message };
+        }
+      } else {
+        vocabularyCategoryId = newCategory.id;
+      }
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("vocabularies")
+    .update({
+      german: formData.german,
+      english: formData.english,
+      example: formData.example || null,
+      vocabulary_category_id: vocabularyCategoryId,
+    })
+    .eq("id", id)
+    .eq("user_id", user.id)
     .select(
       `
       *,

@@ -1,10 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { VocabularyFormDialog } from "./vocabulary-form-dialog";
 import { CategoryFilter } from "./category-filter";
 import { getVocabularies, deleteVocabulary } from "@/app/actions/vocabulary";
@@ -20,6 +26,7 @@ interface Vocabulary {
   id: string;
   german: string;
   english: string;
+  example: string | null;
   vocabulary_category_id: string | null;
   vocabulary_category: { id: string; name: string } | null;
 }
@@ -36,6 +43,8 @@ export function VocabularyClient({
   initialCount,
 }: VocabularyClientProps) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedVocabulary, setSelectedVocabulary] = React.useState<Vocabulary | null>(null);
+  const [editVocabulary, setEditVocabulary] = React.useState<Vocabulary | null>(null);
   const [vocabularies, setVocabularies] =
     React.useState<Vocabulary[]>(initialVocabularies);
   const [totalCount, setTotalCount] = React.useState(initialCount);
@@ -131,7 +140,8 @@ export function VocabularyClient({
           vocabularies.map((v) => (
             <div
               key={v.id}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+              className="flex items-center gap-3 p-3 rounded-lg border bg-card cursor-pointer hover:bg-accent/50 transition-colors"
+              onClick={() => setSelectedVocabulary(v)}
             >
               <span className="font-medium">{v.german}</span>
               <span className="text-muted-foreground">=</span>
@@ -144,8 +154,22 @@ export function VocabularyClient({
               <Button
                 variant="ghost"
                 size="icon"
-                className={`${v.vocabulary_category ? "" : "ml-auto "}h-8 w-8 text-muted-foreground hover:text-destructive`}
-                onClick={() => handleDelete(v.id)}
+                className={`${v.vocabulary_category ? "" : "ml-auto "}h-8 w-8 text-muted-foreground hover:text-foreground`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditVocabulary(v);
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(v.id);
+                }}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -192,6 +216,72 @@ export function VocabularyClient({
         categories={initialCategories}
         onSaved={() => setRefreshKey((k) => k + 1)}
       />
+
+      <VocabularyFormDialog
+        open={!!editVocabulary}
+        onOpenChange={(open) => {
+          if (!open) setEditVocabulary(null);
+        }}
+        categories={initialCategories}
+        onSaved={() => setRefreshKey((k) => k + 1)}
+        editData={editVocabulary ?? undefined}
+      />
+
+      <Dialog
+        open={!!selectedVocabulary}
+        onOpenChange={(open) => {
+          if (!open) setSelectedVocabulary(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle>Vocabulary Detail</DialogTitle>
+          </DialogHeader>
+          {selectedVocabulary && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">German</p>
+                  <p className="font-medium">{selectedVocabulary.german}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">English</p>
+                  <p className="font-medium">{selectedVocabulary.english}</p>
+                </div>
+              </div>
+              {selectedVocabulary.vocabulary_category && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Category</p>
+                  <Badge variant="secondary">
+                    {selectedVocabulary.vocabulary_category.name}
+                  </Badge>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Example</p>
+                <p className="mt-1">
+                  {selectedVocabulary.example || (
+                    <span className="text-muted-foreground italic">No example added</span>
+                  )}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditVocabulary(selectedVocabulary);
+                    setSelectedVocabulary(null);
+                  }}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

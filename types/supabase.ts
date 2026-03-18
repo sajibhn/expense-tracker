@@ -42,6 +42,71 @@ export type Database = {
         }
         Relationships: []
       }
+      vocabularies: {
+        Row: {
+          created_at: string
+          english: string
+          example: string | null
+          german: string
+          id: string
+          updated_at: string
+          user_id: string
+          vocabulary_category_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          english: string
+          example?: string | null
+          german: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          vocabulary_category_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          english?: string
+          example?: string | null
+          german?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          vocabulary_category_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabularies_vocabulary_category_id_fkey"
+            columns: ["vocabulary_category_id"]
+            isOneToOne: false
+            referencedRelation: "vocabulary_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vocabulary_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
