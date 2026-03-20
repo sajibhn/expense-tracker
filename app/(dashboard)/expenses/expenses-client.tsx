@@ -12,15 +12,21 @@ type Expense = Database["public"]["Tables"]["expenses"]["Row"] & {
   category?: { id: string; name: string } | null;
 };
 
+type Category = Database["public"]["Tables"]["categories"]["Row"];
+
 interface ExpensesClientProps {
   initialExpenses: Expense[];
   initialCount: number;
+  categories: Category[];
+  initialCategoryId?: string;
 }
 
-export function ExpensesClient({ initialExpenses, initialCount }: ExpensesClientProps) {
+export function ExpensesClient({ initialExpenses, initialCount, categories, initialCategoryId }: ExpensesClientProps) {
   const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
   const [totalCount, setTotalCount] = useState(initialCount);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
+    initialCategoryId ? [{ id: "category", value: [initialCategoryId] }] : []
+  );
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -28,7 +34,18 @@ export function ExpensesClient({ initialExpenses, initialCount }: ExpensesClient
   });
   const [isPending, startTransition] = useTransition();
 
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.id,
+    label: cat.name,
+  }));
+
   const filters: any = [
+    {
+      key: "category",
+      title: "Category",
+      type: "multiselect",
+      options: categoryOptions,
+    },
     {
       key: "date",
       title: "Date",
@@ -53,9 +70,13 @@ export function ExpensesClient({ initialExpenses, initialCount }: ExpensesClient
       }
     }
 
+    const categoryFilter = columnFilters.find((filter) => filter.id === "category");
+    const categoryIds = categoryFilter?.value as string[] | undefined;
+
     startTransition(async () => {
       const result = await getExpenses({
         dateRange,
+        categoryIds: categoryIds?.length ? categoryIds : undefined,
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
       });

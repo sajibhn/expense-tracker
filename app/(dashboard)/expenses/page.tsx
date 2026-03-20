@@ -1,14 +1,18 @@
 import { getExpenses } from "@/app/actions/expenses";
+import { getCategories } from "@/app/actions/categories";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ExpensesClient } from "./expenses-client";
 
-export default async function ExpensesPage() {
-  const { data: expenses, error, count } = await getExpenses({
-    page: 0,
-    pageSize: 10,
-  });
+export default async function ExpensesPage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const { category } = await searchParams;
+  const categoryIds = category ? [category] : undefined;
+
+  const [{ data: expenses, error, count }, { data: categories }] = await Promise.all([
+    getExpenses({ page: 0, pageSize: 10, categoryIds }),
+    getCategories(),
+  ]);
 
   if (error) {
     return (
@@ -35,7 +39,7 @@ export default async function ExpensesPage() {
         </Link>
       </div>
 
-      <ExpensesClient initialExpenses={expenses || []} initialCount={count} />
+      <ExpensesClient initialExpenses={expenses || []} initialCount={count} categories={categories || []} initialCategoryId={category} />
     </div>
   );
 }

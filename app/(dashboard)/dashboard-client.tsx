@@ -12,6 +12,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfDay, differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import { getDashboardData } from "@/app/actions/dashboard";
 import type { DateRange } from "react-day-picker";
 
@@ -164,8 +165,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categorySummary.map((category) => (
-                <div
+                <Link
                   key={category.id}
+                  href={`/expenses?category=${category.id}`}
                   className="bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-center gap-4">
@@ -201,7 +203,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
                       </p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

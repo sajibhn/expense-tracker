@@ -6,7 +6,10 @@
       "Bash(rm -rf node_modules)",
       "Bash(find f:codeexpense-tracker -name *vocabulary* -type f)",
       "Bash(find f:codeexpense-tracker -path */types/* -name *.ts -type f)",
-      "Bash(npx shadcn@latest add textarea --yes)"
+      "Bash(npx shadcn@latest add textarea --yes)",
+      "Bash(find /f/code/expense-tracker/lib -type f -name *.ts)",
+      "Bash(ls -la /f/code/expense-tracker/app/*/lib/)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

@@ -10,6 +10,7 @@ type ExpenseUpdate = Database["public"]["Tables"]["expenses"]["Update"];
 
 export async function getExpenses(params?: {
   dateRange?: { from?: string; to?: string };
+  categoryIds?: string[];
   page?: number;
   pageSize?: number;
 }) {
@@ -34,6 +35,11 @@ export async function getExpenses(params?: {
       .lte("date", params.dateRange.to);
   }
 
+  // Apply category filter to count if provided
+  if (params?.categoryIds?.length) {
+    countQuery = countQuery.in("category_id", params.categoryIds);
+  }
+
   const { count } = await countQuery;
 
   // Build data query
@@ -50,6 +56,11 @@ export async function getExpenses(params?: {
     query = query
       .gte("date", params.dateRange.from)
       .lte("date", params.dateRange.to);
+  }
+
+  // Apply category filter if provided
+  if (params?.categoryIds?.length) {
+    query = query.in("category_id", params.categoryIds);
   }
 
   // Apply pagination
