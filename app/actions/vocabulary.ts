@@ -84,7 +84,7 @@ export async function getVocabularies(params?: {
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  query = query.order("created_at", { ascending: false }).range(from, to);
+  query = query.order("order", { ascending: false }).range(from, to);
 
   const { data, error } = await query;
 

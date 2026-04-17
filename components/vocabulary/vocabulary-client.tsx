@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,17 @@ export function VocabularyClient({
   const [page, setPage] = React.useState(0);
   const [refreshKey, setRefreshKey] = React.useState(0);
   const [isPending, startTransition] = React.useTransition();
+  const [hideEnglish, setHideEnglish] = React.useState(false);
+  const [revealedIds, setRevealedIds] = React.useState<Set<string>>(new Set());
+
+  const toggleReveal = (id: string) => {
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Debounce search to avoid excessive server calls
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
@@ -106,10 +117,31 @@ export function VocabularyClient({
           <h1 className="text-3xl font-bold">Vocabulary ({totalCount})</h1>
           <p className="text-gray-600">Manage your German-English vocabulary</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Vocabulary
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setHideEnglish((h) => !h);
+              setRevealedIds(new Set());
+            }}
+          >
+            {hideEnglish ? (
+              <>
+                <Eye className="mr-2 h-4 w-4" />
+                Show
+              </>
+            ) : (
+              <>
+                <EyeOff className="mr-2 h-4 w-4" />
+                Hide
+              </>
+            )}
+          </Button>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Vocabulary
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -145,7 +177,21 @@ export function VocabularyClient({
             >
               <span className="font-medium">{v.german}</span>
               <span className="text-muted-foreground">=</span>
-              <span>{v.english}</span>
+              {hideEnglish && !revealedIds.has(v.id) ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleReveal(v.id);
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              ) : (
+                <span>{v.english}</span>
+              )}
               {v.vocabulary_category && (
                 <Badge variant="secondary" className="ml-auto">
                   {v.vocabulary_category.name}

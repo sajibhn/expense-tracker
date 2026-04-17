@@ -49,6 +49,7 @@ export type Database = {
           example: string | null
           german: string
           id: string
+          order: number
           updated_at: string
           user_id: string
           vocabulary_category_id: string | null
